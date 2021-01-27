@@ -5,7 +5,11 @@ public class ComputerShip extends Ship{
 		this.armor = armor;
 		this.speed = 1 + (speedUp ? 1 : 0);
 		this.decks = decks;
-		this.sign = sign;
+		if(sign == "1"){
+			this.sign = "K";
+		}else{
+			this.sign = sign;
+		}
 		x_y_coord = new int[decks][2];
 		for(int i = 0; i < decks; i++){
 			x_y_coord[i][0] = point;
