@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class SeaWarsChess {
 
 	static Field field = new Field(8);
-	public static boolean gameOver, factOfDamage;
+	public static boolean gameOver, factOfDamage, doYouShoot;
 	static ArrayList<Ship> arrMyShip = new ArrayList<Ship>();
 	static ArrayList<Ship> arrComShip = new ArrayList<Ship>();
 
@@ -22,14 +22,22 @@ public class SeaWarsChess {
 		int level = 3;
 		boolean rightNum = false;
 		while(!rightNum){
-			System.out.println("How many ships u'd like?(but u cant match more then "+ level+" )");
-			Scanner sc = new Scanner(System.in);
-			int quantityOships = sc.nextInt();
-			if(quantityOships <= level  & quantityOships>=(int)Math.floor((double)level/3)){
-				CreateViliansShips(arrMyShip, level, quantityOships, false);
-				rightNum = true;
-			}else{
-				System.out.println("Try another one number");
+			try{
+				System.out.println("");
+				System.out.println("How many ships you want? ( but it can't be match more then "+ level+" )");
+				System.out.println("");
+				Scanner sc = new Scanner(System.in);
+				int quantityOships = sc.nextInt();
+				if(quantityOships <= level  & quantityOships>=(int)Math.floor((double)level/3)){
+					CreateViliansShips(arrMyShip, level, quantityOships, false);
+					rightNum = true;
+				}else{
+					System.out.println("Try another one number");
+				}
+			}catch(Exception e){
+				System.out.println("");
+				System.out.println("It must be number!!!");
+				System.out.println("");
 			}
 		}
 
@@ -48,14 +56,20 @@ public class SeaWarsChess {
 			}else{	
 				boolean rightValue = false;
 				while(!rightValue){
-					System.out.println("Which ship u'd like(U can choose from 1 to "+arrMyShip.size()+" )");
-					Scanner sc = new Scanner(System.in);
-					int num = sc.nextInt();
-					if(num <= arrMyShip.size() & num>0){
-						i = num - 1;
-						rightValue = true;
-					}else{
-						System.out.println("Wrong value. Try again");
+					try{
+						System.out.println("Which ship u'd like(U can choose from 1 to "+arrMyShip.size()+" )");
+						Scanner sc = new Scanner(System.in);
+						int num = sc.nextInt();
+						if(num <= arrMyShip.size() & num>0){
+							i = num - 1;
+							rightValue = true;
+						}else{
+							System.out.println("Wrong value. Try again");
+						}
+					}catch(Exception e){
+						System.out.println("");
+						System.out.println("It must be number!!!");
+						System.out.println("");
 					}
 				}
 			}
@@ -71,7 +85,7 @@ public class SeaWarsChess {
 				System.out.println("   - exit ( to exit )");
 				System.out.println("   - shoot");
 				Scanner sc = new Scanner(System.in);
-				whatToDo(sc.nextLine(), arrMyShip.get(i), arrComShip);
+				whatToDo(sc.nextLine(), arrMyShip, arrComShip, i);
 			}
 			if(arrMyShip.get(i).factOfMoove){
 				field.viewField();
@@ -93,60 +107,108 @@ public class SeaWarsChess {
 
 	}
 
-	static void whatToDo(String way, Ship ship1, ArrayList<Ship> arrCShip){
+	static void whatToDo(String way, ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip){
 		switch(way){
 			case "go left":
-				ship1.sailLeft();
+				ship1.get(indexOfShip).sailLeft();
 				break;
 			case "go right":
-				ship1.sailRight();
+				ship1.get(indexOfShip).sailRight();
 				break;
 			case "go up":
-				ship1.sailUp();
+				ship1.get(indexOfShip).sailUp();
 				break;
 			case "go down":
-				ship1.sailDown();
+				ship1.get(indexOfShip).sailDown();
 				break;
 			case "shoot":
-				boolean doYouShoot = false;
+				doYouShoot = false;
 				while(!doYouShoot){
-					System.out.println("Enter coordinates to shoot:");
-					Scanner sc = new Scanner(System.in);
-					int x = sc.nextInt();
-					int y = sc.nextInt();
-					MyShip mine = (MyShip)ship1;
-					if(mine.rangeIsEnough(x,y)){
-						if(field.field[ x - 1 ][ y - 1 ] != "X"){
-							ship1.shoot(x,y);
-							factOfDamage = false;
-							for(int i = 0; i < arrComShip.size(); i++){
-								arrCShip.get(i).getDamage();
-								if(arrCShip.get(i).dead){
-									mine.upGrade();
-								}
-							}
-							arrCShip.get(arrComShip.size()-1).isItMissed(x,y);
-							ship1.factOfMoove = true;
-							doYouShoot = true;				
-						}else{
-							System.out.println("You've already shot there");
-						}
-					}else{
-						System.out.println("Range of this ship isn't enough. Try another coordinates");
-					}
+					myShooting(ship1, arrCShip, indexOfShip, true);
 				}
 				break;
 			case "exit":
+				System.out.println("");
 				System.out.println("- Bye!");
+				System.out.println("");
 				gameOver = true;
-				ship1.factOfMoove = true;
+				ship1.get(indexOfShip).factOfMoove = true;
 				break;
 			
 			default:
+				System.out.println("");
 				System.out.println("- wrong command!");
-				ship1.factOfMoove = false;
+				System.out.println("");
+				ship1.get(indexOfShip).factOfMoove = false;
 				break;
 		}
+	}
+
+	static void myShooting(ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip, boolean myTurn){
+		try{
+			int x, y;
+			MyShip mine = (MyShip)ship1.get(indexOfShip);
+			if(myTurn){
+				System.out.println("");
+				System.out.println("Enter coordinates to shoot:      ( Your range is " + mine.range + " )" );
+				System.out.println("");
+				Scanner sc = new Scanner(System.in);
+				x = sc.nextInt();
+				y = sc.nextInt();
+			}else{
+				x = getRandomInt(1,8);
+				y = getRandomInt(1,8);
+			}
+			
+			if(mine.rangeIsEnough(x,y)){
+				if(field.field[ x - 1 ][ y - 1 ] != "X"){
+					shooting(x, y, mine, ship1, arrCShip, indexOfShip);			
+				}else{
+					if(myTurn){
+						System.out.println("");
+						System.out.println("You've already shot there");
+						System.out.println("");
+					}
+				}
+			}else{
+				if(myTurn){
+			 		System.out.println("");
+					System.out.println("Range of this ship isn't enough. Try another coordinates");
+					System.out.println("");
+				}
+			}
+		}catch(Exception e){
+			System.out.println("");
+			System.out.println("It must be number!!!");
+			System.out.println("");
+		}
+	}
+
+	static void shooting(int x, int y, MyShip mine, ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip){
+		field.field[ x - 1 ][ y - 1 ] = "X";
+		pause(1000);
+		mine.shoot(x,y);
+		factOfDamage = false;
+		for(int i = 0; i < ship1.size(); i++){
+			if(i != indexOfShip){
+				ship1.get(i).getDamage();
+				if(factOfDamage){
+					System.out.println("");
+					System.out.println("You've hit to your own ship. Be careful!");
+					System.out.println("");
+					pause(2000);
+				}
+			}
+		}
+		for(int i = 0; i < arrComShip.size(); i++){
+			arrCShip.get(i).getDamage();
+			if(arrCShip.get(i).dead){
+				mine.upGrade();
+			}
+		}
+		arrCShip.get(arrComShip.size()-1).isItMissed(x,y);
+		mine.factOfMoove = true;
+		doYouShoot = true;
 	}
 
 	static void CreateViliansShips(ArrayList<Ship> arrShip, int level, int quantityOfShips, boolean compCase){
@@ -181,23 +243,33 @@ public class SeaWarsChess {
 			qualityOfShips -= howMuchToAdd;
 			int p = 0;
 			boolean doCircle = true;
-			while(doCircle){ 
-				if(compCase){
-					p = getRandomInt(1,8);
-				}else{
-					Scanner sc = new Scanner(System.in);
-					System.out.println("what position you want?(from 1 to 8, if its not full ofc)");
-					p = sc.nextInt();
-				}
-				if(!point.contains(p)){
+			while(doCircle){
+				try{ 
 					if(compCase){
-						arrShip.add( new ComputerShip(true, true, true, 1 + howMuchToAdd, p, Integer.toString(i+1)));
+						p = getRandomInt(1,8);
 					}else{
-						arrShip.add( new MyShip(true, true, true, 1 + howMuchToAdd, p, Integer.toString(i+1)));
+						Scanner sc = new Scanner(System.in);
+						System.out.println("");
+						System.out.println("what position you want for ship No."+(i+1)+" ?(from 1 to 8, if its not full ofc)");
+						System.out.println("");
+						p = sc.nextInt();
 					}
-					point.add(p);
-					doCircle = false;
-				}else{System.out.println("this position is full");}
+					if(!point.contains(p)){
+						if(compCase){
+							arrShip.add( new ComputerShip(true, true, true, 1 + howMuchToAdd, p, Integer.toString(i+1)));
+						}else{
+							arrShip.add( new MyShip(true, true, true, 1 + howMuchToAdd, p, Integer.toString(i+1)));
+						}
+						point.add(p);
+						doCircle = false;
+					}else{
+						System.out.println("this position is full");
+					}
+				}catch(Exception e){
+					System.out.println("");
+					System.out.println("It must be number!!!");
+					System.out.println("");
+				}
 			}
 			quantityOfShips--;
 		}
@@ -206,18 +278,32 @@ public class SeaWarsChess {
 
 	static int myCase(int from, int to, int i){
 		int howMuchToAdd = 0; 
-		Scanner sc = new Scanner(System.in);
-		boolean rightNum = false;
-		while(!rightNum){
-			System.out.println("how many decks you want for ship No."+(i+1)+"?");
-			System.out.println("You can choose from "+(from + 1)+" to " +(to + 1));
-			int num = sc.nextInt();
-			if(num>=from+1 & num<=to + 1){
-				howMuchToAdd = num-1;
-				rightNum = true;
-			}else{
-				System.out.println("Enter the right number");
-				rightNum = false;
+		if(from == to){
+			howMuchToAdd = from;
+		}else{
+			boolean rightNum = false;
+			while(!rightNum){
+				try{
+					System.out.println("");
+					System.out.println("how many decks you want for ship No."+(i+1)+"?");
+					System.out.println("You can choose from "+(from + 1)+" to " +(to + 1));
+					System.out.println("");
+					Scanner sc = new Scanner(System.in);
+					int num = sc.nextInt();
+					if(num>=from+1 & num<=to + 1){
+						howMuchToAdd = num-1;
+						rightNum = true;
+					}else{
+						System.out.println("");
+						System.out.println("Enter the right number");
+						System.out.println("");
+						rightNum = false;
+					}
+				}catch(Exception e){
+					System.out.println("");
+					System.out.println("It must be number!!!");
+					System.out.println("");
+				}
 			}
 		}
 		return howMuchToAdd;

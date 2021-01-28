@@ -21,7 +21,7 @@ public class MyShip extends Ship{
 		for(int i = 0; i < x_y_coord.length; i++){
 			double length = Math.sqrt((double)(Math.abs(x_y_coord[i][1]-x)*Math.abs(x_y_coord[i][1]-x) +
 			                Math.abs(x_y_coord[i][0]-y)*Math.abs(x_y_coord[i][0]-y)));
-			if(length < range+1){
+			if(length < range*1.5){
 				enough = true;
 			}
 		}

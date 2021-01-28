@@ -42,7 +42,7 @@ public abstract class Ship{
 		for(int i = 0; i < decks; i++){
 			if(x_y_coord[i][x_OR_y] - 1 <= 0 | x_y_coord[i][x_OR_y] - 1 > 8){
 				senseTo_sail = false;
-			}else if(Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != "_" & Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != sign){
+			}else if(Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != "_" & Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != sign & Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != "X"){
 				senseTo_sail = false;
 			}		
 		}
@@ -51,7 +51,7 @@ public abstract class Ship{
 		for(int i = 0; i < decks; i++){
 			if(x_y_coord[i][x_OR_y] + 1 <= 0 | x_y_coord[i][x_OR_y] + 1 > 8){
 				senseTo_sail = false;
-			}else if(Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != "_" & Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != sign){
+			}else if(Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != "_" & Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != sign & Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != "X"){
 				senseTo_sail = false;
 			}		
 		}
