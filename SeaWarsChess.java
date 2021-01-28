@@ -108,23 +108,31 @@ public class SeaWarsChess {
 				ship1.sailDown();
 				break;
 			case "shoot":
-				boolean doYouShoot = true;
-				while(doYouShoot){
+				boolean doYouShoot = false;
+				while(!doYouShoot){
 					System.out.println("Enter coordinates to shoot:");
 					Scanner sc = new Scanner(System.in);
 					int x = sc.nextInt();
 					int y = sc.nextInt();
-					if(field.field[ x - 1 ][ y - 1 ] != "X"){
-						ship1.shoot(x,y);
-						factOfDamage = false;
-						for(int i = 0; i < arrComShip.size(); i++){
-							arrCShip.get(i).getDamage();
+					MyShip mine = (MyShip)ship1;
+					if(mine.rangeIsEnough(x,y)){
+						if(field.field[ x - 1 ][ y - 1 ] != "X"){
+							ship1.shoot(x,y);
+							factOfDamage = false;
+							for(int i = 0; i < arrComShip.size(); i++){
+								arrCShip.get(i).getDamage();
+								if(arrCShip.get(i).dead){
+									mine.upGrade();
+								}
+							}
+							arrCShip.get(arrComShip.size()-1).isItMissed(x,y);
+							ship1.factOfMoove = true;
+							doYouShoot = true;				
+						}else{
+							System.out.println("You've already shot there");
 						}
-						arrCShip.get(arrComShip.size()-1).isItMissed(x,y);
-						ship1.factOfMoove = true;
-						doYouShoot = false;				
 					}else{
-						System.out.println("You've already shot there");
+						System.out.println("Range of this ship isn't enough. Try another coordinates");
 					}
 				}
 				break;

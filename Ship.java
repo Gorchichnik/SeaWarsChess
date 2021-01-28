@@ -3,9 +3,8 @@ import java.util.ArrayList;
 public abstract class Ship{
 	protected int[][] x_y_coord;
         protected int decks;
-	protected int range, accuracy, boarding, damage; 
+	public int range, accuracy, boarding, damage, speed; 
         public boolean armor, dead, factOfMoove;
-	public int speed;
 	protected String sign;
 	protected boolean senseTo_sail = true;
 	protected ArrayList<int[]> arrList_damage = new ArrayList<int[]>();
