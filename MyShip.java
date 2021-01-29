@@ -14,6 +14,7 @@ public class MyShip extends Ship{
 			x_y_coord[i][1] = 8 - i;
 		}
 		super.createShip();
+		damage = 0;
 	}
 
 	public boolean rangeIsEnough(int x,int y){	

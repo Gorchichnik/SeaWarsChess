@@ -5,9 +5,9 @@ import java.util.ArrayList;
 public class SeaWarsChess {
 
 	static Field field = new Field(8);
-	public static boolean gameOver, factOfDamage, doYouShoot;
-	static ArrayList<Ship> arrMyShip = new ArrayList<Ship>();
-	static ArrayList<Ship> arrComShip = new ArrayList<Ship>();
+	public static boolean gameOver, factOfDamage, doYouShoot, factOfComputerMoove, factOfMoove, myShipIsDead;
+	public static ArrayList<Ship> arrMyShip = new ArrayList<Ship>();
+	public static ArrayList<Ship> arrComShip = new ArrayList<Ship>();
 
         public static void main(String... arg) throws IOException, InterruptedException {
         	new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
@@ -73,7 +73,8 @@ public class SeaWarsChess {
 					}
 				}
 			}
-			while(!arrMyShip.get(i).factOfMoove){
+			factOfMoove = false;
+			while(!factOfMoove){
 				System.out.println("");
 				System.out.println("What would u like to do ?");
 				System.out.println("");
@@ -83,20 +84,29 @@ public class SeaWarsChess {
 				System.out.println("   - go down");
 				System.out.println("   - shoot");
 				System.out.println("   - exit ( to exit )");
-				System.out.println("   - shoot");
+				System.out.println("");
 				Scanner sc = new Scanner(System.in);
-				whatToDo(sc.nextLine(), arrMyShip, arrComShip, i);
+				whatToDo(sc.nextLine(), arrMyShip, arrComShip, i, true);
 			}
-			if(arrMyShip.get(i).factOfMoove){
+			if(factOfMoove){
 				field.viewField();
 				pause(600);
-				
+				factOfComputerMoove = false;
 				ai.computerTurn();
+
+				field.viewField();
+				pause(600);
+
 				if(arrComShip.get(0).dead){
 					gameOver = true;
 					System.out.println("You win!");
 				}
-				arrMyShip.get(i).factOfMoove = false;
+				if(myShipIsDead){
+					gameOver = true;
+					System.out.println("You loose!");
+				}
+				factOfMoove = false;
+				factOfComputerMoove = false;
 			}else{
 				field.viewField();
 				System.out.println("");
@@ -107,50 +117,78 @@ public class SeaWarsChess {
 
 	}
 
-	static void whatToDo(String way, ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip){
+	public static void whatToDo(String way, ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip, boolean myTurn){
 		switch(way){
 			case "go left":
 				ship1.get(indexOfShip).sailLeft();
+				factOfMoove = ship1.get(indexOfShip).factOfMoove;
+				factOfComputerMoove = ship1.get(indexOfShip).factOfMoove;
 				break;
 			case "go right":
 				ship1.get(indexOfShip).sailRight();
+				factOfMoove = ship1.get(indexOfShip).factOfMoove;
+				factOfComputerMoove = ship1.get(indexOfShip).factOfMoove;
 				break;
 			case "go up":
 				ship1.get(indexOfShip).sailUp();
+				factOfMoove = ship1.get(indexOfShip).factOfMoove;
+				factOfComputerMoove = ship1.get(indexOfShip).factOfMoove;
 				break;
 			case "go down":
 				ship1.get(indexOfShip).sailDown();
+				factOfMoove = ship1.get(indexOfShip).factOfMoove;
+				factOfComputerMoove = ship1.get(indexOfShip).factOfMoove;
 				break;
 			case "shoot":
 				doYouShoot = false;
 				while(!doYouShoot){
-					myShooting(ship1, arrCShip, indexOfShip, true);
+					myShooting(ship1, arrCShip, indexOfShip, myTurn);
 				}
+				if(arrMyShip.get(0).dead){
+					myShipIsDead = true;
+				}
+				terminator(ship1);
+				terminator(arrCShip);
+				factOfMoove = true;
+				factOfComputerMoove = true;
 				break;
 			case "exit":
 				System.out.println("");
 				System.out.println("- Bye!");
 				System.out.println("");
 				gameOver = true;
-				ship1.get(indexOfShip).factOfMoove = true;
+				factOfMoove = true;
+				factOfComputerMoove = true;
 				break;
 			
 			default:
 				System.out.println("");
 				System.out.println("- wrong command!");
 				System.out.println("");
-				ship1.get(indexOfShip).factOfMoove = false;
+				factOfMoove = false;
 				break;
+		}
+	}
+
+	static void terminator(ArrayList<Ship> arrShip){		
+		for(int i = 0; i < arrShip.size(); i++){
+			if(arrShip.get(i).dead){
+				arrShip.remove(i);
+				for(int j = i; j < arrShip.size(); j++){
+					arrShip.get(j).setSign(Integer.toString(j+1));
+					arrShip.get(j).createShip();
+				}
+				break;
+			}
 		}
 	}
 
 	static void myShooting(ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip, boolean myTurn){
 		try{
 			int x, y;
-			MyShip mine = (MyShip)ship1.get(indexOfShip);
 			if(myTurn){
 				System.out.println("");
-				System.out.println("Enter coordinates to shoot:      ( Your range is " + mine.range + " )" );
+				System.out.println("Enter coordinates to shoot:      ( Your range is " + ship1.get(indexOfShip).range + " )" );
 				System.out.println("");
 				Scanner sc = new Scanner(System.in);
 				x = sc.nextInt();
@@ -159,24 +197,7 @@ public class SeaWarsChess {
 				x = getRandomInt(1,8);
 				y = getRandomInt(1,8);
 			}
-			
-			if(mine.rangeIsEnough(x,y)){
-				if(field.field[ x - 1 ][ y - 1 ] != "X"){
-					shooting(x, y, mine, ship1, arrCShip, indexOfShip);			
-				}else{
-					if(myTurn){
-						System.out.println("");
-						System.out.println("You've already shot there");
-						System.out.println("");
-					}
-				}
-			}else{
-				if(myTurn){
-			 		System.out.println("");
-					System.out.println("Range of this ship isn't enough. Try another coordinates");
-					System.out.println("");
-				}
-			}
+			checkingRange(x, y, ship1, arrCShip, indexOfShip, myTurn);
 		}catch(Exception e){
 			System.out.println("");
 			System.out.println("It must be number!!!");
@@ -184,31 +205,61 @@ public class SeaWarsChess {
 		}
 	}
 
-	static void shooting(int x, int y, MyShip mine, ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip){
-		field.field[ x - 1 ][ y - 1 ] = "X";
-		pause(1000);
-		mine.shoot(x,y);
-		factOfDamage = false;
-		for(int i = 0; i < ship1.size(); i++){
-			if(i != indexOfShip){
-				ship1.get(i).getDamage();
-				if(factOfDamage){
+	static void checkingRange(int x, int y, ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip, boolean myTurn){
+		try{
+		if(ship1.get(indexOfShip).rangeIsEnough(x,y)){
+			if(field.field[ x - 1 ][ y - 1 ] != "X"){
+				shooting(x, y, ship1, arrCShip, indexOfShip, myTurn);			
+			}else{
+				if(myTurn){
 					System.out.println("");
-					System.out.println("You've hit to your own ship. Be careful!");
+					System.out.println("You've already shot there");
 					System.out.println("");
-					pause(2000);
 				}
 			}
+		}else{
+			if(myTurn){
+				System.out.println("");
+				System.out.println("Range of this ship isn't enough. Try another coordinates");
+				System.out.println("");
+			}
 		}
-		for(int i = 0; i < arrComShip.size(); i++){
+		}catch(Exception e){System.out.println("Exception in chekingRange");}
+	}
+
+	static void shooting(int x, int y, ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip, boolean myTurn){
+		try{
+		field.field[ x - 1 ][ y - 1 ] = "X";
+		field.viewField();
+		pause(2000);
+		ship1.get(indexOfShip).shoot(x,y);
+		factOfDamage = false;
+		for(int i = 0; i < ship1.size(); i++){
+			ship1.get(i).getDamage();
+			if(factOfDamage){
+				System.out.println("");
+				System.out.println("You've hit to your own ship. Be careful!");
+				System.out.println("");
+				pause(2000);
+				break;
+			}
+		}
+
+		try{
+		for(int i = 0; i < arrCShip.size(); i++){
 			arrCShip.get(i).getDamage();
-			if(arrCShip.get(i).dead){
+			MyShip mine = (MyShip)ship1.get(indexOfShip);
+			if(arrCShip.get(i).dead & myTurn){
 				mine.upGrade();
 			}
 		}
-		arrCShip.get(arrComShip.size()-1).isItMissed(x,y);
-		mine.factOfMoove = true;
+		}catch(Exception e){System.out.println("Exception in 2");}
+		try{
+		arrCShip.get(arrCShip.size()-1).isItMissed(x,y);
+		ship1.get(indexOfShip).factOfMoove = true;
 		doYouShoot = true;
+		}catch(Exception e){System.out.println("Exception in 1");}
+		}catch(Exception e){System.out.println("Exception in shooting");}
 	}
 
 	static void CreateViliansShips(ArrayList<Ship> arrShip, int level, int quantityOfShips, boolean compCase){
@@ -346,7 +397,7 @@ public class SeaWarsChess {
 			}
 	}
 
-	static int getRandomInt(int a, int b){          
+	public static int getRandomInt(int a, int b){          
            int s = (int)Math.round(Math.random()*(double)(b-a)+(double)a);
            return s;
 	}

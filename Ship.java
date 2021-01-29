@@ -9,6 +9,10 @@ public abstract class Ship{
 	protected boolean senseTo_sail = true;
 	protected ArrayList<int[]> arrList_damage = new ArrayList<int[]>();
 
+	public void setSign(String sign){
+		this.sign = sign;
+	}
+
 	public void sailUp(){	
 		minusCoordMakeSense(1);
 		sailMinusCoord(1);
@@ -30,7 +34,7 @@ public abstract class Ship{
 		Field.field[y - 1][x - 1] = "_";
 	}
 	
-	protected void createShip(){
+	public void createShip(){
 		for(int i = 0; i < decks; i++){
 			Field.field[ x_y_coord[i][1] - 1 ][ x_y_coord[i][0] - 1 ] = sign;		
 		}
@@ -51,7 +55,7 @@ public abstract class Ship{
 		for(int i = 0; i < decks; i++){
 			if(x_y_coord[i][x_OR_y] + 1 <= 0 | x_y_coord[i][x_OR_y] + 1 > 8){
 				senseTo_sail = false;
-			}else if(Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != "_" & Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != sign & Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != "X"){
+			}else if(Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != "_" & Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != sign & Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != "X"){
 				senseTo_sail = false;
 			}		
 		}
@@ -95,11 +99,15 @@ public abstract class Ship{
 		for(int i = 0; i < decks; i++){
 			if(Field.field[ x_y_coord[i][1] - 1 ][ x_y_coord[i][0] - 1 ] == "o"){
 				Field.field[ x_y_coord[i][1] - 1 ][ x_y_coord[i][0] - 1 ] = "X";
+				
 				damage++;
 				SeaWarsChess.factOfDamage = true;
 				arrList_damage.add(new int[]{x_y_coord[i][0],x_y_coord[i][1]});
 				if(damage == decks){
 					dead = true;	
+					for(int j = 0; j < decks; j++){
+						Field.field[ x_y_coord[j][1] - 1 ][ x_y_coord[j][0] - 1 ] = "_";
+					}
 				}
 			}
 		}
@@ -108,5 +116,17 @@ public abstract class Ship{
 		if(!SeaWarsChess.factOfDamage){
 			Field.field[x - 1][y - 1] = "_";
 		}
+	}
+
+	public boolean rangeIsEnough(int x,int y){	
+		boolean enough = false;
+		for(int i = 0; i < x_y_coord.length; i++){
+			double length = Math.sqrt((double)(Math.abs(x_y_coord[i][1]-x)*Math.abs(x_y_coord[i][1]-x) +
+			                Math.abs(x_y_coord[i][0]-y)*Math.abs(x_y_coord[i][0]-y)));
+			if(length < range*1.5){
+				enough = true;
+			}
+		}
+		return enough;
 	}
 }
