@@ -3,8 +3,8 @@ import java.util.ArrayList;
 public abstract class Ship{
 	protected int[][] x_y_coord;
         protected int decks;
-	public int range, accuracy, boarding, damage, speed; 
-        public boolean armor, dead, factOfMoove;
+	public int range, boarding, damage, view; 
+        public boolean dead, factOfMoove;
 	protected String sign;
 	protected boolean senseTo_sail = true;
 	protected ArrayList<int[]> arrList_damage = new ArrayList<int[]>();
@@ -14,20 +14,20 @@ public abstract class Ship{
 	}
 
 	public void sailUp(){	
-		minusCoordMakeSense(1);
-		sailMinusCoord(1);
+		coordMakeSense(1,-1);
+		sailCoord(1,-1);
 	}
 	public void sailDown(){
-                plusCoordMakeSense(1);
-		sailPlusCoord(1);
+                coordMakeSense(1,1);
+		sailCoord(1,1);
 	}
 	public void sailLeft(){
-		minusCoordMakeSense(0);
-		sailMinusCoord(0);
+		coordMakeSense(0,-1);
+		sailCoord(0,-1);
 	}
 	public void sailRight(){
-		plusCoordMakeSense(0);
-		sailPlusCoord(0);
+		coordMakeSense(0,1);
+		sailCoord(0,1);
 	}
 
 	protected void deleteCell(int x, int y){
@@ -42,50 +42,29 @@ public abstract class Ship{
 				Field.field[ arrList_damage.get(i)[1] - 1][ arrList_damage.get(i)[0] - 1 ] = "X";
 		}
 	}
-	protected void minusCoordMakeSense(int x_OR_y){
+
+	protected void coordMakeSense(int x_OR_y, int one){
 		for(int i = 0; i < decks; i++){
-			if(x_y_coord[i][x_OR_y] - 1 <= 0 | x_y_coord[i][x_OR_y] - 1 > 8){
+			if(x_y_coord[i][x_OR_y] + one <= 0 | x_y_coord[i][x_OR_y] + one > SeaWarsChess.d){
 				senseTo_sail = false;
-			}else if(Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != "_" & Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != sign & Field.field[ x_y_coord[i][1] - 1 - x_OR_y][ x_y_coord[i][0] - 2 + x_OR_y] != "X"){
+			}else if(Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != "_" & Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != sign & Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != "X"){
 				senseTo_sail = false;
 			}		
 		}
 	}
-	protected void plusCoordMakeSense(int x_OR_y){
-		for(int i = 0; i < decks; i++){
-			if(x_y_coord[i][x_OR_y] + 1 <= 0 | x_y_coord[i][x_OR_y] + 1 > 8){
-				senseTo_sail = false;
-			}else if(Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != "_" & Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != sign & Field.field[ x_y_coord[i][1] - 1 + x_OR_y][ x_y_coord[i][0] - x_OR_y] != "X"){
-				senseTo_sail = false;
-			}		
-		}
-	}
-	protected void sailMinusCoord(int x_OR_y){
+	
+	protected void sailCoord(int x_OR_y, int one){
 		if(senseTo_sail){
 			for(int i = 0; i < decks; i++){
 				deleteCell(x_y_coord[i][0],x_y_coord[i][1]);
-				x_y_coord[i][x_OR_y]--;		
+				x_y_coord[i][x_OR_y] += one;		
 			}
 			for(int i = 0; i < arrList_damage.size(); i++){
-				arrList_damage.get(i)[x_OR_y]--;
+				arrList_damage.get(i)[x_OR_y] += one;
 			}
 			createShip();
 			factOfMoove = true;
-		}
-		senseTo_sail = true;
-	}
-	protected void sailPlusCoord(int x_OR_y){
-		if(senseTo_sail){
-			for(int i = 0; i < decks; i++){
-				deleteCell(x_y_coord[i][0],x_y_coord[i][1]);
-				x_y_coord[i][x_OR_y]++;		
-			}
-			for(int i = 0; i < arrList_damage.size(); i++){
-				arrList_damage.get(i)[x_OR_y]++;
-			}
-			createShip();
-			factOfMoove = true;
-		}
+		}else{factOfMoove = false;}
 		senseTo_sail = true;
 	}
 	
@@ -118,13 +97,33 @@ public abstract class Ship{
 		}
 	}
 
+	public boolean doYouBit(int x, int y){
+		boolean bit = false;
+		for(int i = 0; i < decks; i++){	
+			if(x_y_coord[i][1] == x & x_y_coord[i][0] == y){
+				bit = true;
+				break;
+			}
+		}
+		return bit;
+	}
+
 	public boolean rangeIsEnough(int x,int y){	
+		return oportunityIsEnough(x,y,range);
+	}
+
+	public boolean doYouSeeThisCell(int x,int y){	
+		return oportunityIsEnough(x,y,view);
+	}
+
+	public boolean oportunityIsEnough(int x,int y,int opportunity){	
 		boolean enough = false;
 		for(int i = 0; i < x_y_coord.length; i++){
-			double length = Math.sqrt((double)(Math.abs(x_y_coord[i][1]-x)*Math.abs(x_y_coord[i][1]-x) +
-			                Math.abs(x_y_coord[i][0]-y)*Math.abs(x_y_coord[i][0]-y)));
-			if(length < range*1.5){
+			int xLength = Math.abs(x_y_coord[i][1]-x);
+			int yLength = Math.abs(x_y_coord[i][0]-y);
+			if(xLength <= opportunity & yLength <= opportunity){
 				enough = true;
+				break;
 			}
 		}
 		return enough;

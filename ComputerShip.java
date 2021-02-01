@@ -1,9 +1,9 @@
 public class ComputerShip extends Ship{
 
-	public ComputerShip(boolean wduLike_range, boolean armor, boolean speedUp, int decks, int point, String sign){
-		this.range = (wduLike_range ? 1 : 0) + decks;
-		this.armor = armor;
-		this.speed = 1 + (speedUp ? 1 : 0);
+	public ComputerShip(int decks, int point, String sign){
+		this.range = decks;
+		this.view = (int)Math.ceil((double)decks/2);
+		this.boarding = 1;
 		this.decks = decks;
 		if(sign == "1"){
 			this.sign = "K";
@@ -21,11 +21,8 @@ public class ComputerShip extends Ship{
 	public void upGradeCannons(){
 		range++;
 	}
-	public void upGradeSail(){
-		speed++;
-	}
-	public void trainSooting(){
-		accuracy++;
+	public void upGradeView(){
+		view++;
 	}
 	public void trainBattle(){
 		boarding++;
