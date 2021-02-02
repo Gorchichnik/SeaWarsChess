@@ -28,10 +28,30 @@ public class Ai{
 		boolean weCanShoot = false;
 //System.out.println("THE Begining size ="+SeaWarsChess.arrComShip.size());
 		do{
-			x_y[0] = SeaWarsChess.getRandomInt(1,SeaWarsChess.d);
-			x_y[1] = SeaWarsChess.getRandomInt(1,SeaWarsChess.d);
-			if(SeaWarsChess.field.field[ x_y[0] - 1 ][ x_y[1] - 1 ] != "X"){
-				weCanShoot = chekingAll(x_y[0],x_y[1],SeaWarsChess.arrComShip, numOfShip);
+			boolean findOut = false;
+			for(int i=0; i<SeaWarsChess.d; i++){
+				for(int j=0; j<SeaWarsChess.d; j++){
+					for(int k=0; k<SeaWarsChess.arrComShip.size(); k++){
+						if(SeaWarsChess.arrComShip.get(k).doYouSeeThisCell(i+1,j+1)){
+							if(SeaWarsChess.field.field[ i ][ j ] != "X" & SeaWarsChess.field.field[ i ][ j ] != "_" & SeaWarsChess.field.field[ i ][ j ] != "-" & chekingAll(i+1,j+1,SeaWarsChess.arrComShip, numOfShip)){
+								x_y[0] = i+1;
+								x_y[1] = j+1;
+								findOut = true;
+								weCanShoot = true;
+							}
+						}
+						if(findOut){break;}
+					}
+					if(findOut){break;}
+				}
+				if(findOut){break;}
+			}
+			if(!findOut){
+				x_y[0] = SeaWarsChess.getRandomInt(1,SeaWarsChess.d);
+				x_y[1] = SeaWarsChess.getRandomInt(1,SeaWarsChess.d);
+				if(SeaWarsChess.field.field[ x_y[0] - 1 ][ x_y[1] - 1 ] != "X"){
+					weCanShoot = chekingAll(x_y[0],x_y[1],SeaWarsChess.arrComShip, numOfShip);
+				}
 			}	
 			System.out.println("weCAnShoot = " + Boolean.toString(weCanShoot));
 		}while(!weCanShoot);

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class SeaWarsChess {
 	public static int d = 8;
 	public static Field field = new Field(d);
-	public static boolean gameOver, factOfDamage, doYouShoot, factOfComputerMoove, factOfMoove, myShipIsDead;
+	public static boolean gameOver, factOfDamage, doYouShoot, factOfComputerMoove, factOfMoove, myShipIsDead, comShipIsDead;
 	public static ArrayList<Ship> arrMyShip = new ArrayList<Ship>();
 	public static ArrayList<Ship> arrComShip = new ArrayList<Ship>();
 	public static String[] villianSigns = {"A","B","C","D","E","F","G","H"};
@@ -20,7 +20,7 @@ public class SeaWarsChess {
 		field.viewField();
 		
 		
-		int level = 3;
+		int level = 5;
 		boolean rightNum = false;
 		while(!rightNum){
 			try{
@@ -42,7 +42,7 @@ public class SeaWarsChess {
 			}
 		}
 
-		int vilianLevel = 3;
+		int vilianLevel = 5;
 		CreateViliansShips(arrComShip, vilianLevel, getRandomInt((int)Math.ceil((double)level/3),level), true);
 		
 		Ai ai = new Ai();
@@ -103,7 +103,7 @@ public class SeaWarsChess {
 				field.viewField();
 				pause(600);
 
-				if(arrComShip.get(0).dead){
+				if(comShipIsDead){
 					gameOver = true;
 					System.out.println("You win!");
 				}
@@ -146,17 +146,21 @@ public class SeaWarsChess {
 				factOfComputerMoove = ship1.get(indexOfShip).factOfMoove;
 				break;
 			case "shoot":
-				doYouShoot = false;
-				while(!doYouShoot){
-					myShooting(ship1, arrCShip, indexOfShip, myTurn);
+				if(arrComShip.size()!=0){
+					doYouShoot = false;
+					while(!doYouShoot){
+						myShooting(ship1, arrCShip, indexOfShip, myTurn);
+					}
+					if(arrMyShip.get(0).dead){
+						myShipIsDead = true;
+					}else if(arrComShip.get(0).dead){
+						comShipIsDead = true;
+					}
+					terminator(ship1);
+					terminator(arrCShip);
+					factOfMoove = true;
+					factOfComputerMoove = true;
 				}
-				if(arrMyShip.get(0).dead){
-					myShipIsDead = true;
-				}
-				terminator(ship1);
-				terminator(arrCShip);
-				factOfMoove = true;
-				factOfComputerMoove = true;
 				break;
 			case "exit":
 				System.out.println("");
@@ -179,11 +183,11 @@ public class SeaWarsChess {
 	static void terminator(ArrayList<Ship> arrShip){		
 		for(int i = 0; i < arrShip.size(); i++){
 			if(arrShip.get(i).dead){
-				arrShip.remove(i);
-				for(int j = i; j < arrShip.size(); j++){
-					arrShip.get(j).setSign(Integer.toString(j+1));
+				for(int j = arrShip.size()-1; j > i; j--){
+					arrShip.get(j).setSign(arrShip.get(j-1).sign);
 					arrShip.get(j).createShip();
 				}
+				arrShip.remove(i);
 				break;
 			}
 		}
@@ -224,9 +228,10 @@ public class SeaWarsChess {
 				ai.createRandomXY();
 				x = ai.getX();
 				y = ai.getY();
+				
 //System.out.println("x = "+x+"y = "+y);
 			}
-			shooting(x, y, ship1, arrCShip, indexOfShip, myTurn);			
+				shooting(x, y, ship1, arrCShip, indexOfShip, myTurn);			
 		}catch(Exception e){
 			System.out.println("");
 			System.out.println("It must be number!!!");
@@ -254,7 +259,7 @@ public class SeaWarsChess {
 			try{
 				for(int i = 0; i < arrCShip.size(); i++){
 					arrCShip.get(i).getDamage();
-					if(arrCShip.get(i).dead & myTurn){
+					if(arrCShip.get(i).dead & myTurn & arrComShip.size()!=1 & i!=0){
 						MyShip mine = (MyShip)ship1.get(indexOfShip);
 						mine.upGrade();
 					}

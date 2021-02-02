@@ -5,7 +5,7 @@ public abstract class Ship{
         protected int decks;
 	public int range, boarding, damage, view; 
         public boolean dead, factOfMoove;
-	protected String sign;
+	public String sign;
 	protected boolean senseTo_sail = true;
 	protected ArrayList<int[]> arrList_damage = new ArrayList<int[]>();
 
@@ -47,7 +47,13 @@ public abstract class Ship{
 		for(int i = 0; i < decks; i++){
 			if(x_y_coord[i][x_OR_y] + one <= 0 | x_y_coord[i][x_OR_y] + one > SeaWarsChess.d){
 				senseTo_sail = false;
-			}else if(Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != "_" & Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != sign & Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != "X"){
+			}else if(Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != "_" & 
+				Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != sign & 
+				Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != "X" & 
+				Field.field[ x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] != "-"){
+				senseTo_sail = false;
+			}else if(Field.field[x_y_coord[i][1] - 1 + one*x_OR_y][ x_y_coord[i][0] - x_OR_y*one - 1 + one] == "X" &
+						 !doYouBit(x_y_coord[i][1] + one*x_OR_y, x_y_coord[i][0] - x_OR_y*one + one)){
 				senseTo_sail = false;
 			}		
 		}
