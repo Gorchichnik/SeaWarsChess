@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public abstract class Ship{
 	protected int[][] x_y_coord;
         protected int decks;
-	public int range, boarding, damage, view; 
+	public int range, boarding, damage, view, rivalIndexToBoard; 
         public boolean dead, factOfMoove;
 	public String sign;
 	protected boolean senseTo_sail = true;
@@ -77,15 +77,41 @@ public abstract class Ship{
 	public void shoot(int x, int y){
 		Field.field[ x - 1 ][ y - 1 ] = "o";
 	}
-	public void boarding(){
-		System.out.println("There will be boarding...");
+	public void boarding(ArrayList<Ship> myShips, ArrayList<Ship> rivalShips){
+		int youCanBoardThisShip = 0;
+		if(boarding >= rivalShips.get(rivalIndexToBoard).boarding ){
+			if(boarding == rivalShips.get(rivalIndexToBoard).boarding ){
+				youCanBoardThisShip = SeaWarsChess.getRandomInt(0,1);
+			}else{
+				youCanBoardThisShip = 1;
+			}
+		}
+		if(youCanBoardThisShip == 1){
+ 
+			myShips.add(rivalShips.get(rivalIndexToBoard));
+			try{
+				if(Integer.parseInt( myShips.get(myShips.size()-2).sign) != -1){
+					myShips.get(myShips.size()-1).setSign( Integer.toString(myShips.size()) );
+				}
+			}catch(NumberFormatException e){
+				myShips.get(myShips.size()-1).setSign( SeaWarsChess.villianSigns[myShips.size()-1] );
+			}
+			myShips.get(myShips.size()-1).createShip();
+			SeaWarsChess.terminateOne(rivalShips, rivalIndexToBoard);
+		}
 	}
+
 	public void getDamage(){
 		for(int i = 0; i < decks; i++){
 			if(Field.field[ x_y_coord[i][1] - 1 ][ x_y_coord[i][0] - 1 ] == "o"){
 				Field.field[ x_y_coord[i][1] - 1 ][ x_y_coord[i][0] - 1 ] = "X";
 				
 				damage++;
+				view = (int)Math.ceil((double)(decks - 1)/2) + view - (int)Math.ceil((double)(decks)/2);
+				range -= 1;
+				if(boarding != 1){
+					boarding -= 1;
+				}
 				SeaWarsChess.factOfDamage = true;
 				arrList_damage.add(new int[]{x_y_coord[i][0],x_y_coord[i][1]});
 				if(damage == decks){
@@ -120,6 +146,37 @@ public abstract class Ship{
 
 	public boolean doYouSeeThisCell(int x,int y){	
 		return oportunityIsEnough(x,y,view);
+	}
+
+	public boolean canUBoard(ArrayList<Ship> rivalShips){	
+		boolean uCanBoard = false;
+		for(int i = 0; i < x_y_coord.length; i++){
+			for(int j = -1; j < 2; j++){
+				for(int k = -1; k < 2; k++){
+					if(checkingCell(x_y_coord[i][1] + j, x_y_coord[i][0] +k, rivalShips) ){
+						uCanBoard = true;
+						break;
+					}
+				}
+				if(uCanBoard){break;}
+			}
+			if(uCanBoard){break;}
+		}
+		return uCanBoard;
+	}
+
+	private boolean checkingCell(int x, int y, ArrayList<Ship> rivalShips){
+		boolean uCanBoard = false;
+		if(x*y != 0 & x<9 & y<9){
+			for(int i=0; i<rivalShips.size(); i++){
+				if(rivalShips.get(i).doYouBit(x,y)){
+					uCanBoard = true;
+					rivalIndexToBoard = i;
+					break;
+				}
+			}
+		}
+		return 	uCanBoard;
 	}
 
 	public boolean oportunityIsEnough(int x,int y,int opportunity){	

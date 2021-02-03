@@ -3,7 +3,7 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 public class SeaWarsChess {
-	public static int d = 8;
+	public static final int d = 8;
 	public static Field field = new Field(d);
 	public static boolean gameOver, factOfDamage, doYouShoot, factOfComputerMoove, factOfMoove, myShipIsDead, comShipIsDead;
 	public static ArrayList<Ship> arrMyShip = new ArrayList<Ship>();
@@ -24,12 +24,13 @@ public class SeaWarsChess {
 		boolean rightNum = false;
 		while(!rightNum){
 			try{
+				int quantityOships = 0;	
 				System.out.println("");
-				System.out.println("How many ships you want? ( but it can't be match more then "+ level+" )");
+				System.out.println("How many ships you want? ( but it can't be match more then "+ level+" and less then " +(int)Math.ceil((double)level/3)+")");
 				System.out.println("");
 				Scanner sc = new Scanner(System.in);
-				int quantityOships = sc.nextInt();
-				if(quantityOships <= level  & quantityOships>=(int)Math.floor((double)level/3)){
+				quantityOships = sc.nextInt();
+				if(quantityOships <= level  & quantityOships>=(int)Math.ceil((double)level/3)){
 					CreateViliansShips(arrMyShip, level, quantityOships, false);
 					rightNum = true;
 				}else{
@@ -79,15 +80,24 @@ public class SeaWarsChess {
 				System.out.println("");
 				System.out.println("What would u like to do ?");
 				System.out.println("");
-				System.out.println("   - go left");
-				System.out.println("   - go right");
-				System.out.println("   - go up");
-				System.out.println("   - go down");
-				System.out.println("   - shoot");
-				System.out.println("   - exit ( to exit )");
+				System.out.println("   Go:");
+				System.out.println("   - <l>eft");
+				System.out.println("   - <r>ight");
+				System.out.println("   - <u>p");
+				System.out.println("   - <d>own");
+				System.out.println("   - <s>hoot");
+				if(arrMyShip.get(i).canUBoard(arrComShip)){
+					System.out.println("   - <b>oard");
+				}
+				System.out.println("   - <e>xit ( to exit )");
 				System.out.println("");
 				Scanner sc = new Scanner(System.in);
-				whatToDo(sc.nextLine(), arrMyShip, arrComShip, i, true);
+				int numBefore = arrMyShip.size();
+				whatToDo(sc.next().charAt(0), arrMyShip, arrComShip, i, true);
+				if(numBefore!=arrMyShip.size()){
+					System.out.println("   You've sucessfully captured villainous ship!");
+					pause(2000);
+				}
 				if(!factOfMoove){
 					field.viewField();
 					System.out.println("");
@@ -123,29 +133,30 @@ public class SeaWarsChess {
 
 	}
 
-	public static void whatToDo(String way, ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip, boolean myTurn){
+	public static void whatToDo(char charWay, ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip, boolean myTurn){
+		String way = Character.toString(charWay);
 		switch(way){
-			case "go left":
+			case "l":
 				ship1.get(indexOfShip).sailLeft();
 				factOfMoove = ship1.get(indexOfShip).factOfMoove;
 				factOfComputerMoove = ship1.get(indexOfShip).factOfMoove;
 				break;
-			case "go right":
+			case "r":
 				ship1.get(indexOfShip).sailRight();
 				factOfMoove = ship1.get(indexOfShip).factOfMoove;
 				factOfComputerMoove = ship1.get(indexOfShip).factOfMoove;
 				break;
-			case "go up":
+			case "u":
 				ship1.get(indexOfShip).sailUp();
 				factOfMoove = ship1.get(indexOfShip).factOfMoove;
 				factOfComputerMoove = ship1.get(indexOfShip).factOfMoove;
 				break;
-			case "go down":
+			case "d":
 				ship1.get(indexOfShip).sailDown();
 				factOfMoove = ship1.get(indexOfShip).factOfMoove;
 				factOfComputerMoove = ship1.get(indexOfShip).factOfMoove;
 				break;
-			case "shoot":
+			case "s":
 				if(arrComShip.size()!=0){
 					doYouShoot = false;
 					while(!doYouShoot){
@@ -162,7 +173,12 @@ public class SeaWarsChess {
 					factOfComputerMoove = true;
 				}
 				break;
-			case "exit":
+			case "b":
+				ship1.get(indexOfShip).boarding(ship1, arrCShip);
+				factOfMoove = true;
+				factOfComputerMoove = true;
+				break;
+			case "e":
 				System.out.println("");
 				System.out.println("- Bye!");
 				System.out.println("");
@@ -183,15 +199,20 @@ public class SeaWarsChess {
 	static void terminator(ArrayList<Ship> arrShip){		
 		for(int i = 0; i < arrShip.size(); i++){
 			if(arrShip.get(i).dead){
-				for(int j = arrShip.size()-1; j > i; j--){
-					arrShip.get(j).setSign(arrShip.get(j-1).sign);
-					arrShip.get(j).createShip();
-				}
-				arrShip.remove(i);
+				terminateOne(arrShip, i);
 				break;
 			}
 		}
 	}
+
+	static void terminateOne(ArrayList<Ship> arrShip, int i){
+		for(int j = arrShip.size()-1; j > i; j--){
+			arrShip.get(j).setSign(arrShip.get(j-1).sign);
+			arrShip.get(j).createShip();
+		}
+		arrShip.remove(i);
+	}
+
 
 	static void myShooting(ArrayList<Ship> ship1, ArrayList<Ship> arrCShip, int indexOfShip, boolean myTurn){
 		try{
@@ -206,7 +227,7 @@ public class SeaWarsChess {
 					Scanner sc = new Scanner(System.in);
 					x = sc.nextInt();
 					y = sc.nextInt();
-					if(x*y > 0 & x <= d & y <= d & ai.chekingAll(x, y, ship1, indexOfShip)){
+					if(x*y > 0 & x <= d & y <= d & !ai.doYouBit(x, y, ship1) & arrMyShip.get(indexOfShip).rangeIsEnough(x,y) ){
 						if(field.field[ x - 1 ][ y - 1 ] != "X"){
 							rightCoord = true;			
 						}else{
@@ -224,12 +245,11 @@ public class SeaWarsChess {
 					}
 				}while(!rightCoord);
 			}else{
-//System.out.println("Try xy");
-				ai.createRandomXY();
+System.out.println("Try xy");
 				x = ai.getX();
 				y = ai.getY();
 				
-//System.out.println("x = "+x+"y = "+y);
+System.out.println("x = "+x+"y = "+y);
 			}
 				shooting(x, y, ship1, arrCShip, indexOfShip, myTurn);			
 		}catch(Exception e){
@@ -318,7 +338,7 @@ public class SeaWarsChess {
 					}else{
 						Scanner sc = new Scanner(System.in);
 						System.out.println("");
-						System.out.println("what position you want for ship No."+(i+1)+" ?(from 1 to 8, if its not full ofc)");
+						System.out.println("what position you want for ship No."+(i+1)+" ?(from 1 to " +d+ ", if its not full ofc)");
 						System.out.println("");
 						p = sc.nextInt();
 					}
