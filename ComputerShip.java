@@ -4,6 +4,7 @@ public class ComputerShip extends Ship{
 		this.range = decks;
 		this.view = (int)Math.ceil((double)decks/2);
 		this.boarding = 1;
+		this.coof = 10;
 		this.decks = decks;
 		if(sign == "1"){
 			this.sign = "K";
@@ -25,7 +26,7 @@ public class ComputerShip extends Ship{
 		view++;
 	}
 	public void trainBattle(){
-		boarding++;
+		this.coof *= 2;
 	}
 
 	public int sellShip(){

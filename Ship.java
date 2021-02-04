@@ -3,8 +3,8 @@ import java.util.ArrayList;
 public abstract class Ship{
 	protected int[][] x_y_coord;
         protected int decks;
-	public int range, boarding, damage, view, rivalIndexToBoard; 
-        public boolean dead, factOfMoove;
+	public int range, boarding, damage, view, rivalIndexToBoard, coof; 
+        public boolean dead, factOfMoove, headHasBeenDestroyed;
 	public String sign;
 	protected boolean senseTo_sail = true;
 	protected ArrayList<int[]> arrList_damage = new ArrayList<int[]>();
@@ -77,33 +77,47 @@ public abstract class Ship{
 	public void shoot(int x, int y){
 		Field.field[ x - 1 ][ y - 1 ] = "o";
 	}
-	public void boarding(ArrayList<Ship> myShips, ArrayList<Ship> rivalShips){
+
+	public int coofOfBoarding(ArrayList<Ship> myShips, ArrayList<Ship> rivalShips){
 		int youCanBoardThisShip = 0;
 		if(boarding >= rivalShips.get(rivalIndexToBoard).boarding ){
 			if(boarding == rivalShips.get(rivalIndexToBoard).boarding ){
-				youCanBoardThisShip = SeaWarsChess.getRandomInt(0,1);
+				youCanBoardThisShip = SeaWarsChess.getRandomInt(coof,100);
 			}else{
-				youCanBoardThisShip = 1;
+				youCanBoardThisShip = 100;
 			}
 		}
-		if(youCanBoardThisShip == 1){
- 
+		return youCanBoardThisShip;
+	}
+
+	public void boarding(ArrayList<Ship> myShips, ArrayList<Ship> rivalShips){
+		int youCanBoardThisShip = coofOfBoarding(myShips, rivalShips);
+		if(youCanBoardThisShip > 80){
 			myShips.add(rivalShips.get(rivalIndexToBoard));
+			SeaWarsChess.terminateOne(rivalShips, rivalIndexToBoard);
 			try{
-				if(Integer.parseInt( myShips.get(myShips.size()-2).sign) != -1){
+				if(Integer.parseInt( myShips.get(0).sign) != -1){
 					myShips.get(myShips.size()-1).setSign( Integer.toString(myShips.size()) );
 				}
 			}catch(NumberFormatException e){
-				myShips.get(myShips.size()-1).setSign( SeaWarsChess.villianSigns[myShips.size()-1] );
+				if(myShips.get(0).sign == "P"){
+					myShips.get(myShips.size()-1).setSign( "P" );
+				}else{
+					myShips.get(myShips.size()-1).setSign( SeaWarsChess.villianSigns[myShips.size()-1] );
+				}
 			}
 			myShips.get(myShips.size()-1).createShip();
-			SeaWarsChess.terminateOne(rivalShips, rivalIndexToBoard);
+			
+			if(rivalIndexToBoard == 0){
+				headHasBeenDestroyed = true;
+			}
 		}
 	}
 
 	public void getDamage(){
 		for(int i = 0; i < decks; i++){
 			if(Field.field[ x_y_coord[i][1] - 1 ][ x_y_coord[i][0] - 1 ] == "o"){
+//System.out.println("get damage");
 				Field.field[ x_y_coord[i][1] - 1 ][ x_y_coord[i][0] - 1 ] = "X";
 				
 				damage++;
@@ -114,7 +128,9 @@ public abstract class Ship{
 				}
 				SeaWarsChess.factOfDamage = true;
 				arrList_damage.add(new int[]{x_y_coord[i][0],x_y_coord[i][1]});
+//System.out.println("damage ="+damage+" decks = "+decks);
 				if(damage == decks){
+//System.out.println("dead");
 					dead = true;	
 					for(int j = 0; j < decks; j++){
 						Field.field[ x_y_coord[j][1] - 1 ][ x_y_coord[j][0] - 1 ] = "_";

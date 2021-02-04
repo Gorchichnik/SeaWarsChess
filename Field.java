@@ -15,7 +15,7 @@ public class Field {
 	}
       
         public void viewField() throws IOException, InterruptedException {
-		//new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+		new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
 		System.out.println(" ");
 	        System.out.println(" ");
                 System.out.println("               THE SEA WARS CHESS "); 

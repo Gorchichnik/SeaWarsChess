@@ -4,7 +4,8 @@ public class MyShip extends Ship{
 
 	public MyShip(int decks, int point, String sign){
 		this.range = decks;
-		this.view = (int)Math.ceil((double)decks/2);
+		this.view = (int)Math.ceil((double)decks/2)*3;
+		this.coof = 10;
 		this.boarding = 1;
 		this.decks = decks;
 		this.sign = sign;
@@ -68,7 +69,7 @@ public class MyShip extends Ship{
 		view++;
 	}
 	public void trainBattle(){
-		boarding++;
+		this.coof *= 2;
 	}
 
 	public int sellShip(){
